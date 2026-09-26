@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, Phone, ArrowRight, Leaf, Check } from 'lucide-react';
 import { useAuth, useToast, useLang } from '../context/AppContext';
+import { BrandLogo } from '../components/BrandLogo';
 
 const BG_IMAGE = 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=80&auto=format&fit=crop';
 
@@ -79,12 +80,7 @@ export const LoginPage: React.FC = () => {
         <img src={BG_IMAGE} alt="Interior" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-charcoal-900/80 to-transparent" />
         <div className="absolute inset-0 flex flex-col justify-center p-12">
-          <div className="flex items-center gap-2 mb-8">
-            <div className="w-9 h-9 bg-gradient-sage rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold">R</span>
-            </div>
-            <span className="font-display font-bold text-2xl text-white">PreCal <span className="text-sage-400">Home</span></span>
-          </div>
+          <BrandLogo size="lg" inverse className="mb-8" />
           <h2 className="text-3xl font-display font-bold text-white mb-4 leading-tight">
             Design Smarter.<br />Build Better.<br />Spend Wisely.
           </h2>
@@ -112,12 +108,7 @@ export const LoginPage: React.FC = () => {
       <div className="flex-1 flex items-center justify-center bg-cream-50 px-4 py-12">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
-          <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 bg-gradient-sage rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">R</span>
-            </div>
-            <span className="font-display font-bold text-xl text-charcoal-800">PreCal <span className="text-sage-600">Home</span></span>
-          </div>
+          <BrandLogo className="lg:hidden mb-8" />
 
           <div className="mb-8">
             <h1 className="text-3xl font-display font-bold text-charcoal-800 mb-2">Welcome back</h1>
@@ -241,12 +232,7 @@ export const RegisterPage: React.FC = () => {
         <img src="https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=1200&q=80" alt="Interior" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-charcoal-900/80 to-transparent" />
         <div className="absolute inset-0 flex flex-col justify-center p-12">
-          <div className="flex items-center gap-2 mb-8">
-            <div className="w-9 h-9 bg-gradient-sage rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold">R</span>
-            </div>
-            <span className="font-display font-bold text-2xl text-white">PreCal <span className="text-sage-400">Home</span></span>
-          </div>
+          <BrandLogo size="lg" inverse className="mb-8" />
           <h2 className="text-3xl font-display font-bold text-white mb-4 leading-tight">
             Start Your Renovation Journey Today
           </h2>
@@ -259,12 +245,7 @@ export const RegisterPage: React.FC = () => {
       {/* Right: Form */}
       <div className="flex-1 flex items-center justify-center bg-cream-50 px-4 py-12">
         <div className="w-full max-w-md">
-          <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 bg-gradient-sage rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">R</span>
-            </div>
-            <span className="font-display font-bold text-xl text-charcoal-800">PreCal <span className="text-sage-600">Home</span></span>
-          </div>
+          <BrandLogo className="lg:hidden mb-8" />
 
           <div className="mb-8">
             <h1 className="text-3xl font-display font-bold text-charcoal-800 mb-2">Create your account</h1>

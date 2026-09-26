@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, Home, Zap, Star, Users, LogIn, Globe } from 'lucide-react';
 import { useAuth, useLang } from '../context/AppContext';
+import { BrandLogo } from './BrandLogo';
 
 const languages = [
   { code: 'en', label: 'EN', name: 'English' },
@@ -45,14 +46,7 @@ export const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 bg-gradient-sage rounded-lg flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-              <span className="text-white font-bold text-sm">R</span>
-            </div>
-            <span className="font-display font-bold text-xl text-charcoal-800">
-              PreCal <span className="text-sage-600">Home</span>
-            </span>
-          </Link>
+          <BrandLogo className="group [&_img]:shadow-sm [&_img]:transition-transform group-hover:[&_img]:scale-105" />
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-1">

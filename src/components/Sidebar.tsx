@@ -4,6 +4,7 @@ import {
   LayoutDashboard, PlusCircle, FolderOpen, History, Users, UserCircle, LogOut, X, Leaf
 } from 'lucide-react';
 import { useAuth } from '../context/AppContext';
+import { BrandLogo } from './BrandLogo';
 
 const navItems = [
   { label: 'Overview', href: '/dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
@@ -33,14 +34,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
       {/* Header */}
       <div className="p-5 border-b border-warm-100">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-sage rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">R</span>
-            </div>
-            <span className="font-display font-bold text-lg text-charcoal-800">
-              PreCal <span className="text-sage-600">Home</span>
-            </span>
-          </Link>
+          <BrandLogo size="sm" />
           {onClose && (
             <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100 transition-colors md:hidden">
               <X className="w-4 h-4 text-charcoal-600" />

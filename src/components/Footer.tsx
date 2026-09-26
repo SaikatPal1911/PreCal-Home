@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Leaf } from 'lucide-react';
+import { BrandLogo } from './BrandLogo';
 
 const footerLinks = {
   Company: [
@@ -29,14 +30,7 @@ export const Footer: React.FC = () => (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
         {/* Brand */}
         <div className="lg:col-span-2">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 bg-gradient-sage rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">R</span>
-            </div>
-            <span className="font-display font-bold text-xl">
-              PreCal <span className="text-sage-400">Home</span>
-            </span>
-          </div>
+          <BrandLogo className="mb-4" inverse />
           <p className="text-sm text-gray-400 leading-relaxed mb-2 italic font-display">
             "Design Smarter. Build Better. Spend Wisely."
           </p>

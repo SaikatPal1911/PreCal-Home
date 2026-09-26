@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from '../components/Sidebar';
 import { Menu } from 'lucide-react';
+import { BrandLogo } from '../components/BrandLogo';
 
 export const DashboardLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -33,14 +34,7 @@ export const DashboardLayout: React.FC = () => {
           >
             <Menu className="w-5 h-5" />
           </button>
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-gradient-sage rounded-md flex items-center justify-center">
-              <span className="text-white font-bold text-xs">R</span>
-            </div>
-            <span className="font-display font-bold text-base text-charcoal-800">
-              PreCal <span className="text-sage-600">Home</span>
-            </span>
-          </div>
+          <BrandLogo size="sm" />
         </div>
 
         {/* Page Content */}

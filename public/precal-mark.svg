@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="title desc">
+  <title id="title">PreCal Home mark</title>
+  <desc id="desc">A roof enclosing a precise AI spark and measurement ticks</desc>
+  <rect width="48" height="48" rx="13" fill="#5f966f"/>
+  <path d="M10 22.5 24 11l14 11.5" fill="none" stroke="#fffdf8" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M14 21.5V36h20V21.5" fill="none" stroke="#fffdf8" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M24 18.2v10.6M18.7 23.5h10.6" stroke="#f3c969" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M14 39.5h20M17 36v3.5M22 36v3.5M27 36v3.5M32 36v3.5" fill="none" stroke="#fffdf8" stroke-width="1.8" stroke-linecap="round"/>
+</svg>
