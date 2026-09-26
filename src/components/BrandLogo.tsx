@@ -19,7 +19,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({ size = 'md', inverse = fal
   const accentColor = inverse ? 'text-sage-400' : 'text-sage-600';
 
   return (
-    <Link to="/" className={`flex items-center gap-2 ${className}`} aria-label="PreCal Home home">
+    <Link to="/" className={`flex items-center gap-2 ${className}`} aria-label="PreCal Home">
       <img src="/precal-mark.svg" alt="" className={`${scale.icon} flex-shrink-0`} />
       <span className={`font-display font-bold ${scale.text} ${textColor}`}>
         PreCal <span className={accentColor}>Home</span>
