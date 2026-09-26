@@ -6,7 +6,7 @@ import {
   Ruler, Sparkles, Info, Loader2
 } from 'lucide-react';
 import { useAnalysis, useToast } from '../context/AppContext';
-import { generateMockAnalysis } from '../data/mockAnalysis';
+import { analysisApi, imagesApi } from '../api/client';
 import type { RenovationCategory } from '../types';
 
 // Step Indicator
@@ -358,19 +358,34 @@ export const AnalysisPage: React.FC = () => {
   const handleAnalyze = async () => {
     if (!state.category) return;
     setAnalyzing(true);
-    await new Promise(r => setTimeout(r, 2500));
-    const result = generateMockAnalysis(
-      state.category,
-      state.budget,
-      state.propertyType,
-      state.measurements as any,
-      state.preferences as any,
-      state.imagePreviewUrls[0]
-    );
-    setResult(result);
-    showToast('Analysis complete! Viewing your results.', 'success');
-    setAnalyzing(false);
-    navigate('/result');
+    try {
+      // Upload image to backend first if any
+      let imageUrl = state.imagePreviewUrls[0];
+      if (state.uploadedImages.length > 0) {
+        try {
+          const uploaded = await imagesApi.upload(state.uploadedImages[0]);
+          imageUrl = uploaded.url;
+        } catch {
+          // fallback to local preview URL
+        }
+      }
+      // Call real Python analysis engine
+      const result = await analysisApi.run({
+        category: state.category,
+        budget: state.budget,
+        propertyType: state.propertyType,
+        measurements: state.measurements,
+        preferences: state.preferences,
+        imageUrl,
+      });
+      setResult(result);
+      showToast('Analysis complete! Viewing your results.', 'success');
+      navigate('/result');
+    } catch (err: any) {
+      showToast(err.message || 'Analysis failed. Please try again.', 'error');
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   return (

@@ -1,10 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search, MapPin, Filter, Star, Shield, Clock,
-  ChevronDown, X, Phone, Calendar, Check, ArrowLeft
+  ChevronDown, X, Phone, Calendar, Check, ArrowLeft, Loader2
 } from 'lucide-react';
-import { mockProfessionals } from '../data/mockProfessionals';
+import { professionalsApi } from '../api/client';
 import { useToast } from '../context/AppContext';
 import type { Professional } from '../types';
 
@@ -204,19 +204,38 @@ const ProfileModal: React.FC<{ pro: Professional; onClose: () => void; onBook: (
 const BookingModal: React.FC<{ pro: Professional; onClose: () => void }> = ({ pro, onClose }) => {
   const [form, setForm] = useState({ name: '', phone: '', location: '', category: '', date: '', slot: '', requirements: '' });
   const [confirmed, setConfirmed] = useState(false);
-  const [refNumber] = useState(`RNO-${Math.floor(100000 + Math.random() * 900000)}`);
+  const [refNumber, setRefNumber] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const { showToast } = useToast();
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }));
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!form.name || !form.phone || !form.date || !form.slot) {
       showToast('Please fill all required fields.', 'warning');
       return;
     }
-    setConfirmed(true);
-    showToast('Booking confirmed! 🎉', 'success');
+    setSubmitting(true);
+    try {
+      const booking = await professionalsApi.book({
+        professional_id: pro.id,
+        customer_name: form.name,
+        phone: form.phone,
+        location: form.location || 'Not specified',
+        category: form.category || undefined,
+        date: form.date,
+        time_slot: form.slot,
+        requirements: form.requirements || undefined,
+      });
+      setRefNumber(booking.reference_number);
+      setConfirmed(true);
+      showToast('Booking confirmed!', 'success');
+    } catch (err: any) {
+      showToast(err.message || 'Booking failed. Please try again.', 'error');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -275,8 +294,9 @@ const BookingModal: React.FC<{ pro: Professional; onClose: () => void }> = ({ pr
               </div>
             </div>
 
-            <button onClick={handleConfirm} className="btn-primary w-full justify-center py-3.5">
-              <Calendar className="w-4 h-4" /> Confirm Booking
+            <button onClick={handleConfirm} disabled={submitting} className="btn-primary w-full justify-center py-3.5 disabled:opacity-60">
+              {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Calendar className="w-4 h-4" />}
+              {submitting ? 'Confirming...' : 'Confirm Booking'}
             </button>
           </div>
         ) : (
@@ -321,6 +341,8 @@ const BookingModal: React.FC<{ pro: Professional; onClose: () => void }> = ({ pr
 
 export const ProfessionalsPage: React.FC = () => {
   const navigate = useNavigate();
+  const [allProfessionals, setAllProfessionals] = useState<Professional[]>([]);
+  const [loading, setLoading] = useState(true);
   const [location, setLocation] = useState('');
   const [searched, setSearched] = useState(false);
   const [profType, setProfType] = useState('All');
@@ -329,8 +351,24 @@ export const ProfessionalsPage: React.FC = () => {
   const [selectedPro, setSelectedPro] = useState<Professional | null>(null);
   const [bookingPro, setBookingPro] = useState<Professional | null>(null);
 
+  // Load professionals from backend
+  useEffect(() => {
+    professionalsApi.list()
+      .then(data => setAllProfessionals(data.map((p: any) => ({
+        id: p.id, name: p.name, avatar: p.avatar, profession: p.profession,
+        specialization: p.specialization, serviceArea: p.serviceArea,
+        experience: p.experience, rating: p.rating, reviews: p.reviews,
+        startingPrice: p.startingPrice, consultationFee: p.consultationFee,
+        availability: p.availability, verified: p.verified, distance: p.distance,
+        portfolio: p.portfolio, skills: p.skills, services: p.services,
+        slots: p.slots, bio: p.bio,
+      }))))
+      .catch(() => {/* backend not reachable, show empty */})
+      .finally(() => setLoading(false));
+  }, []);
+
   const filtered = useMemo(() => {
-    let list = [...mockProfessionals];
+    let list = [...allProfessionals];
     if (profType !== 'All') list = list.filter(p => p.profession === profType);
     if (minRating > 0) list = list.filter(p => p.rating >= minRating);
     list.sort((a, b) => {
@@ -340,7 +378,7 @@ export const ProfessionalsPage: React.FC = () => {
       return 0;
     });
     return list;
-  }, [profType, minRating, sortBy]);
+  }, [allProfessionals, profType, minRating, sortBy]);
 
   return (
     <div className="p-6 lg:p-8 max-w-6xl mx-auto animate-fade-in">
@@ -434,7 +472,14 @@ export const ProfessionalsPage: React.FC = () => {
         </div>
       </div>
 
-      <p className="text-sm text-charcoal-700 opacity-60 mb-4">{filtered.length} professionals found</p>
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 text-sage-600 animate-spin" />
+          <span className="ml-3 text-charcoal-700">Loading professionals...</span>
+        </div>
+      ) : (
+        <p className="text-sm text-charcoal-700 opacity-60 mb-4">{filtered.length} professionals found</p>
+      )}
 
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

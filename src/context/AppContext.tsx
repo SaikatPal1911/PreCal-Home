@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { User, Project, AnalysisState, AnalysisResult, RenovationCategory, BudgetCategory, PropertyType, Measurements, Preferences } from '../types';
+import { authApi, projectsApi } from '../api/client';
 
 // ------- AUTH CONTEXT -------
 interface AuthContextType {
@@ -43,6 +44,7 @@ interface ProjectsContextType {
   projects: Project[];
   saveProject: (p: Project) => void;
   deleteProject: (id: string) => void;
+  loadProjects: () => Promise<void>;
 }
 
 const ProjectsContext = createContext<ProjectsContextType | null>(null);
@@ -147,35 +149,68 @@ const translations: Record<Language, Record<string, string>> = {
 
 // ------- PROVIDER -------
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Auth
+  // Auth — restore from localStorage
   const [user, setUser] = useState<User | null>(() => {
     const stored = localStorage.getItem('renoai_user');
     return stored ? JSON.parse(stored) : null;
   });
   const [authLoading, setAuthLoading] = useState(false);
 
-  const login = useCallback(async (email: string, _password: string): Promise<boolean> => {
+  const _saveUser = (u: User, token: string) => {
+    localStorage.setItem('renoai_user', JSON.stringify(u));
+    localStorage.setItem('renoai_token', token);
+    setUser(u);
+  };
+
+  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     setAuthLoading(true);
-    await new Promise(r => setTimeout(r, 1200));
-    const mockUser: User = { id: 'u1', name: email.split('@')[0].replace('.', ' '), email };
-    localStorage.setItem('renoai_user', JSON.stringify(mockUser));
-    setUser(mockUser);
-    setAuthLoading(false);
-    return true;
+    try {
+      // Demo frontend-only login
+      await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
+      
+      const demoUser = {
+        id: 'demo-' + Date.now(),
+        name: 'Demo User',
+        email: email,
+        phone: '1234567890'
+      };
+      const demoToken = 'demo-jwt-token-frontend-only';
+      
+      _saveUser(demoUser, demoToken);
+      return true;
+    } catch {
+      return false;
+    } finally {
+      setAuthLoading(false);
+    }
   }, []);
 
-  const register = useCallback(async (name: string, email: string, phone: string, _password: string): Promise<boolean> => {
+  const register = useCallback(async (name: string, email: string, phone: string, password: string): Promise<boolean> => {
     setAuthLoading(true);
-    await new Promise(r => setTimeout(r, 1500));
-    const mockUser: User = { id: 'u1', name, email, phone };
-    localStorage.setItem('renoai_user', JSON.stringify(mockUser));
-    setUser(mockUser);
-    setAuthLoading(false);
-    return true;
+    try {
+      // Demo frontend-only registration
+      await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
+      
+      const demoUser = {
+        id: 'demo-' + Date.now(),
+        name: name,
+        email: email,
+        phone: phone
+      };
+      const demoToken = 'demo-jwt-token-frontend-only';
+      
+      _saveUser(demoUser, demoToken);
+      return true;
+    } catch {
+      return false;
+    } finally {
+      setAuthLoading(false);
+    }
   }, []);
 
   const logout = useCallback(() => {
     localStorage.removeItem('renoai_user');
+    localStorage.removeItem('renoai_token');
     setUser(null);
   }, []);
 
@@ -191,18 +226,46 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const setPreferences = useCallback((p: Partial<Preferences>) => setAnalysisState(s => ({ ...s, preferences: { ...s.preferences, ...p } })), []);
   const resetAnalysis = useCallback(() => { setAnalysisState(defaultAnalysisState); setResult(null); }, []);
 
-  // Projects
+  // Projects — load from backend, fallback to localStorage
   const [projects, setProjects] = useState<Project[]>(() => {
     const stored = localStorage.getItem('renoai_projects');
     return stored ? JSON.parse(stored) : [];
   });
 
+  const loadProjects = useCallback(async () => {
+    try {
+      const data = await projectsApi.list();
+      const mapped: Project[] = data.map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        category: p.category,
+        thumbnail: p.thumbnail,
+        budget: p.budget,
+        createdAt: p.created_at,
+        result: p.result,
+      }));
+      setProjects(mapped);
+      localStorage.setItem('renoai_projects', JSON.stringify(mapped));
+    } catch {
+      // fallback to localStorage — backend might not be reachable
+    }
+  }, []);
+
   const saveProject = useCallback((p: Project) => {
+    // Optimistic local update
     setProjects(prev => {
       const updated = [p, ...prev.filter(x => x.id !== p.id)];
       localStorage.setItem('renoai_projects', JSON.stringify(updated));
       return updated;
     });
+    // Persist to backend
+    projectsApi.create({
+      name: p.name,
+      category: p.category || '',
+      thumbnail: p.thumbnail,
+      budget: p.budget,
+      result: p.result as any,
+    }).catch(() => {/* silent — already saved locally */});
   }, []);
 
   const deleteProject = useCallback((id: string) => {
@@ -211,6 +274,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       localStorage.setItem('renoai_projects', JSON.stringify(updated));
       return updated;
     });
+    projectsApi.delete(id).catch(() => {});
   }, []);
 
   // Toast
@@ -229,7 +293,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   return (
     <AuthContext.Provider value={{ user, login, register, logout, isLoading: authLoading }}>
       <AnalysisContext.Provider value={{ state: analysisState, setCategory, setBudget, setPropertyType, setImages, setMeasurements, setPreferences, resetAnalysis, result, setResult }}>
-        <ProjectsContext.Provider value={{ projects, saveProject, deleteProject }}>
+        <ProjectsContext.Provider value={{ projects, saveProject, deleteProject, loadProjects }}>
           <ToastContext.Provider value={{ toasts, showToast, removeToast }}>
             <LanguageContext.Provider value={{ language, setLanguage, t }}>
               {children}
